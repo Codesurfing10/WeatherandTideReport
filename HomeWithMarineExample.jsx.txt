@@ -1,0 +1,15 @@
+import React from 'react';
+import MarineCard from '../components/MarineCard';
+
+export default function HomeWithMarineExample() {
+  // If your app has a different page or App.jsx, import and mount <MarineCard /> where appropriate.
+  return (
+    <div>
+      <h1>Weather & Tide Report</h1>
+      {/* other weather components */}
+      <section style={{ marginTop: 16 }}>
+        <MarineCard station="46042" />
+      </section>
+    </div>
+  );
+}

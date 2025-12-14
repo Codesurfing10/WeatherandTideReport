@@ -1,0 +1,66 @@
+import React, { useEffect, useState } from 'react';
+
+export default function MarineCard({ station = '46042' }) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    setErr(null);
+
+    fetch(`/api/marine/${encodeURIComponent(station)}`)
+      .then((r) => {
+        if (!r.ok) throw new Error(`API error ${r.status}`);
+        return r.json();
+      })
+      .then((json) => {
+        if (!mounted) return;
+        setData(json);
+      })
+      .catch((e) => {
+        if (!mounted) return;
+        setErr(e.message || 'Fetch error');
+      })
+      .finally(() => {
+        if (!mounted) return;
+        setLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [station]);
+
+  const stationUrl = `https://www.ndbc.noaa.gov/station_page.php?station=${encodeURIComponent(station)}`;
+
+  if (loading) return <div className="marine-card">Loading marine data…</div>;
+  if (err) return <div className="marine-card error">Marine data error: {err}</div>;
+
+  const {
+    sea_temperature,
+    wave_height,
+    swell_height,
+    swell_period,
+    swell_direction,
+    timestamp
+  } = data || {};
+
+  return (
+    <div className="marine-card" style={{ border: '1px solid #ddd', padding: '8px', borderRadius: 6 }}>
+      <h3 style={{ margin: '0 0 8px 0' }}>Marine (station {station})</h3>
+      <div>Sea temp: {sea_temperature !== null && sea_temperature !== undefined ? `${sea_temperature} °C` : '—'}</div>
+      <div>Wave height: {wave_height !== null ? `${wave_height} m` : '—'}</div>
+      <div>
+        Swell: {swell_height !== null ? `${swell_height} m` : '—'} {swell_period ? `@ ${swell_period}s` : ''}{' '}
+        {swell_direction ? `from ${swell_direction}°` : ''}
+      </div>
+      <div style={{ fontSize: 12, color: '#666', marginTop: 6 }}>
+        Updated: {timestamp ? new Date(timestamp).toLocaleString() : '—'}
+        {' • '}
+        <a href={stationUrl} target="_blank" rel="noreferrer">NDBC station page</a>
+      </div>
+    </div>
+  );
+}
