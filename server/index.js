@@ -21,6 +21,14 @@ const apiLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// More lenient rate limiter for static files/pages
+const pageLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000, // Much higher limit for page loads
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -34,8 +42,8 @@ app.use('/api/marine', marineRoutes);
 // Serve static files from the root directory
 app.use(express.static(path.join(__dirname, '..')));
 
-// Fallback route for SPA (if needed)
-app.get('*', (req, res) => {
+// Fallback route for SPA (if needed) - with rate limiting
+app.get('*', pageLimiter, (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'index.html'));
 });
 
