@@ -7,7 +7,7 @@
 class MarineCard {
   constructor(containerId, options = {}) {
     this.containerId = containerId;
-    this.station = options.station || '46042'; // Default to Monterey buoy
+    this.station = options.station || '46086'; // Default to San Clemente Basin buoy (closest to Solana Beach)
     this.apiBase = options.apiBase || '/api/marine';
     this.container = document.getElementById(containerId);
     
@@ -47,10 +47,19 @@ class MarineCard {
     } catch (error) {
       console.error('Error fetching marine data:', error);
       contentEl.classList.remove('loading');
+      
+      // Provide specific error messages for common issues
+      let errorMessage = error.message;
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        errorMessage = 'Network error: Unable to connect to the server';
+      } else if (error.message.includes('timeout')) {
+        errorMessage = 'Request timeout: Server took too long to respond';
+      }
+      
       contentEl.innerHTML = `
         <div class="error">
           <strong>⚠️ Error loading marine data</strong><br>
-          ${error.message}<br>
+          ${errorMessage}<br>
           <small>Station: ${this.station}</small>
         </div>
       `;

@@ -14,7 +14,7 @@ A comprehensive weather, tide, and marine conditions dashboard for Solana Beach,
 
 ### Prerequisites
 
-- Node.js (v14 or higher)
+- Node.js (v18 or higher - required for native fetch API)
 - npm
 
 ### Installation

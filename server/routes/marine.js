@@ -109,6 +109,7 @@ router.get('/:station', async (req, res) => {
   
   try {
     // Fetch from NOAA NDBC
+    // Note: Using native fetch API (available in Node.js 18+)
     const ndbcUrl = `https://www.ndbc.noaa.gov/data/realtime2/${station}.json`;
     const response = await fetch(ndbcUrl);
     
