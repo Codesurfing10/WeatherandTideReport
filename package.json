@@ -11,12 +11,18 @@
     "dev": "node server/index.js",
     "test": "jest"
   },
-  "keywords": ["weather", "tide", "marine", "noaa"],
+  "keywords": [
+    "weather",
+    "tide",
+    "marine",
+    "noaa"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.18.2",
-    "cors": "^2.8.5"
+    "express-rate-limit": "^8.2.1"
   },
   "devDependencies": {
     "jest": "^29.7.0"
