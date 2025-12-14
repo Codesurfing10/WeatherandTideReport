@@ -89,6 +89,16 @@
             <p>Based on NOAA data for La Jolla</p>
             <ul id="tide-list" class="loading">Loading tides...</ul>
         </section>
+
+        <section id="marine-buoy">
+            <h2>NOAA Buoy Data (Station 46042)</h2>
+            <div id="marine-card" class="current loading">Loading buoy data...</div>
+            <p style="font-size: 0.9em; opacity: 0.8; margin-top: 10px;">
+                <a href="https://www.ndbc.noaa.gov/station_page.php?station=46042" 
+                   target="_blank" 
+                   style="color: #FFB851;">View Station Details →</a>
+            </p>
+        </section>
     </div>
 
     <footer>Data: Open-Meteo & NOAA • Updated live</footer>
@@ -186,9 +196,75 @@
             });
         }
 
+        async function fetchNDBCBuoy() {
+            const station = '46042';
+            const marineCard = document.getElementById('marine-card');
+            
+            try {
+                // Fetch from our API endpoint
+                const response = await fetch(`/api/marine/${station}`);
+                
+                if (!response.ok) {
+                    throw new Error(`API returned ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Format the display
+                let html = '<div style="text-align: left;">';
+                
+                if (data.sea_temperature !== null) {
+                    const tempF = (data.sea_temperature * 9/5 + 32).toFixed(1);
+                    html += `<strong>Sea Temperature:</strong> ${tempF}°F (${data.sea_temperature.toFixed(1)}°C)<br>`;
+                }
+                
+                if (data.wave_height !== null) {
+                    const waveHeightFt = (data.wave_height * 3.281).toFixed(1);
+                    html += `<strong>Wave Height:</strong> ${waveHeightFt} ft (${data.wave_height.toFixed(1)} m)<br>`;
+                }
+                
+                if (data.swell_height !== null) {
+                    const swellHeightFt = (data.swell_height * 3.281).toFixed(1);
+                    html += `<strong>Swell Height:</strong> ${swellHeightFt} ft (${data.swell_height.toFixed(1)} m)`;
+                    
+                    if (data.swell_period !== null) {
+                        html += ` @ ${data.swell_period.toFixed(0)}s`;
+                    }
+                    
+                    if (data.swell_direction !== null) {
+                        const dir = getDirectionArrow(data.swell_direction);
+                        html += ` ${dir}`;
+                    }
+                    
+                    html += '<br>';
+                }
+                
+                if (data.timestamp) {
+                    const updateTime = new Date(data.timestamp).toLocaleString([], {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit'
+                    });
+                    html += `<small style="opacity: 0.7;">Updated: ${updateTime}</small>`;
+                }
+                
+                html += '</div>';
+                
+                marineCard.innerHTML = html;
+                marineCard.classList.remove('loading');
+                
+            } catch (error) {
+                console.error('Error fetching NDBC buoy data:', error);
+                marineCard.innerHTML = '<span style="opacity: 0.7;">Buoy data unavailable</span>';
+                marineCard.classList.remove('loading');
+            }
+        }
+
         fetchWeather();
         fetchMarine();
         fetchTides();
+        fetchNDBCBuoy();
     </script>
 </body>
 </html>
