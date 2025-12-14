@@ -1,0 +1,21 @@
+{
+  "name": "weather-and-tide-report",
+  "version": "1.0.0",
+  "description": "Solana Beach weather, tides, and marine conditions",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node server/index.js",
+    "test": "jest"
+  },
+  "keywords": ["weather", "tides", "marine", "noaa"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
