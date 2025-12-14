@@ -1,0 +1,34 @@
+name: Deploy to GitHub Pages
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build (if Node.js project)
+        run: |
+          if [ -f package.json ]; then
+            npm ci
+            if grep -q "\"build\"" package.json; then
+              npm run build
+            fi
+          fi
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v3
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          # Change this path to the folder that contains your static site (e.g. ./dist or ./public) if needed
+          path: ./
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v1
