@@ -19,11 +19,6 @@ app.use('/api/marine', marineRouter);
 // Serve static files from the root directory
 app.use(express.static(path.join(__dirname, '..')));
 
-// Fallback to index.html for client-side routing
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'index.html'));
-});
-
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

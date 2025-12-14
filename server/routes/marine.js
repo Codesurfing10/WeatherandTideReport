@@ -41,6 +41,19 @@ router.get('/:station', async (req, res) => {
   }
 
   try {
+    // Demo mode: return mock data if USE_MOCK_DATA environment variable is set
+    if (process.env.USE_MOCK_DATA === 'true') {
+      console.log(`Using mock data for station ${station}`);
+      const mockData = {
+        time: new Date().toISOString(),
+        wt: 15.8,
+        wvht: 2.1,
+        dpd: 11,
+        mwd: 285
+      };
+      const normalizedData = normalizeNDBCData(mockData, station);
+      return res.json(normalizedData);
+    }
     // Check cache first
     const cacheKey = station.toLowerCase();
     const cached = cache.get(cacheKey);
@@ -56,7 +69,6 @@ router.get('/:station', async (req, res) => {
     console.log(`Fetching NDBC data from: ${ndbcUrl}`);
 
     const response = await fetch(ndbcUrl, {
-      timeout: 10000,
       headers: {
         'User-Agent': 'WeatherandTideReport/1.0'
       }
