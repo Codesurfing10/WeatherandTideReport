@@ -116,4 +116,31 @@ describe('parseMarineData', () => {
     expect(result.raw.custom_field).toBe('test');
     expect(result.raw.another_field).toBe(42);
   });
+
+  test('should handle invalid numeric values gracefully', () => {
+    const ndbcData = {
+      time: '2024-01-15T12:00:00Z',
+      wtmp: 'invalid',
+      wvht: 'not a number',
+      swper: NaN
+    };
+
+    const result = parseMarineData(ndbcData, '46042');
+    expect(result.sea_temperature).toBeNull();
+    expect(result.wave_height).toBeNull();
+    expect(result.swell_period).toBeNull();
+  });
+
+  test('should handle invalid date strings gracefully', () => {
+    const ndbcData = {
+      time: 'invalid date',
+      wtmp: 15.0
+    };
+
+    const result = parseMarineData(ndbcData, '46042');
+    expect(result.timestamp).toBeDefined();
+    expect(result.timestamp).not.toBe('invalid date');
+    // Should fall back to current time
+    expect(new Date(result.timestamp).getTime()).toBeGreaterThan(Date.now() - 5000);
+  });
 });

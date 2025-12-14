@@ -4,6 +4,39 @@
  */
 
 /**
+ * Safely parse a float value, returning null if invalid
+ * @param {*} value - Value to parse
+ * @returns {number|null} Parsed float or null
+ */
+function safeParseFloat(value) {
+  if (value === undefined || value === null) {
+    return null;
+  }
+  const parsed = parseFloat(value);
+  return isNaN(parsed) ? null : parsed;
+}
+
+/**
+ * Safely parse a date string to ISO format
+ * @param {*} dateValue - Date value to parse
+ * @returns {string|null} ISO date string or null
+ */
+function safeParseDateISO(dateValue) {
+  if (!dateValue) {
+    return null;
+  }
+  try {
+    const date = new Date(dateValue);
+    if (isNaN(date.getTime())) {
+      return null;
+    }
+    return date.toISOString();
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
  * Parse and normalize NOAA NDBC JSON response
  * @param {Object} ndbcData - Raw NOAA NDBC JSON response
  * @param {String} station - Station ID
@@ -16,63 +49,33 @@ function parseMarineData(ndbcData, station) {
 
   // Extract timestamp - try multiple possible fields
   let timestamp = null;
-  if (ndbcData.time) {
-    timestamp = new Date(ndbcData.time).toISOString();
-  } else if (ndbcData.timestamp) {
-    timestamp = new Date(ndbcData.timestamp).toISOString();
-  } else if (ndbcData.observation_time) {
-    timestamp = new Date(ndbcData.observation_time).toISOString();
-  } else {
-    timestamp = new Date().toISOString();
-  }
+  timestamp = safeParseDateISO(ndbcData.time) 
+    || safeParseDateISO(ndbcData.timestamp) 
+    || safeParseDateISO(ndbcData.observation_time)
+    || new Date().toISOString();
 
   // Extract sea temperature - try multiple possible field names
-  let seaTemperature = null;
-  if (ndbcData.sea_temp !== undefined && ndbcData.sea_temp !== null) {
-    seaTemperature = parseFloat(ndbcData.sea_temp);
-  } else if (ndbcData.wt !== undefined && ndbcData.wt !== null) {
-    seaTemperature = parseFloat(ndbcData.wt);
-  } else if (ndbcData.water_temp !== undefined && ndbcData.water_temp !== null) {
-    seaTemperature = parseFloat(ndbcData.water_temp);
-  } else if (ndbcData.wtmp !== undefined && ndbcData.wtmp !== null) {
-    seaTemperature = parseFloat(ndbcData.wtmp);
-  }
+  const seaTemperature = safeParseFloat(ndbcData.sea_temp)
+    || safeParseFloat(ndbcData.wt)
+    || safeParseFloat(ndbcData.water_temp)
+    || safeParseFloat(ndbcData.wtmp);
 
   // Extract wave height
-  let waveHeight = null;
-  if (ndbcData.wave_height !== undefined && ndbcData.wave_height !== null) {
-    waveHeight = parseFloat(ndbcData.wave_height);
-  } else if (ndbcData.significant_wave_height !== undefined && ndbcData.significant_wave_height !== null) {
-    waveHeight = parseFloat(ndbcData.significant_wave_height);
-  } else if (ndbcData.wvht !== undefined && ndbcData.wvht !== null) {
-    waveHeight = parseFloat(ndbcData.wvht);
-  }
+  const waveHeight = safeParseFloat(ndbcData.wave_height)
+    || safeParseFloat(ndbcData.significant_wave_height)
+    || safeParseFloat(ndbcData.wvht);
 
   // Extract swell data
-  let swellHeight = null;
-  if (ndbcData.swell_height !== undefined && ndbcData.swell_height !== null) {
-    swellHeight = parseFloat(ndbcData.swell_height);
-  } else if (ndbcData.swh !== undefined && ndbcData.swh !== null) {
-    swellHeight = parseFloat(ndbcData.swh);
-  }
+  const swellHeight = safeParseFloat(ndbcData.swell_height)
+    || safeParseFloat(ndbcData.swh);
 
-  let swellPeriod = null;
-  if (ndbcData.swell_period !== undefined && ndbcData.swell_period !== null) {
-    swellPeriod = parseFloat(ndbcData.swell_period);
-  } else if (ndbcData.swper !== undefined && ndbcData.swper !== null) {
-    swellPeriod = parseFloat(ndbcData.swper);
-  } else if (ndbcData.dpd !== undefined && ndbcData.dpd !== null) {
-    swellPeriod = parseFloat(ndbcData.dpd);
-  }
+  const swellPeriod = safeParseFloat(ndbcData.swell_period)
+    || safeParseFloat(ndbcData.swper)
+    || safeParseFloat(ndbcData.dpd);
 
-  let swellDirection = null;
-  if (ndbcData.swell_direction !== undefined && ndbcData.swell_direction !== null) {
-    swellDirection = parseFloat(ndbcData.swell_direction);
-  } else if (ndbcData.swdir !== undefined && ndbcData.swdir !== null) {
-    swellDirection = parseFloat(ndbcData.swdir);
-  } else if (ndbcData.mwd !== undefined && ndbcData.mwd !== null) {
-    swellDirection = parseFloat(ndbcData.mwd);
-  }
+  const swellDirection = safeParseFloat(ndbcData.swell_direction)
+    || safeParseFloat(ndbcData.swdir)
+    || safeParseFloat(ndbcData.mwd);
 
   return {
     source: 'ndbc',
@@ -87,4 +90,8 @@ function parseMarineData(ndbcData, station) {
   };
 }
 
-module.exports = { parseMarineData };
+module.exports = { 
+  parseMarineData,
+  safeParseFloat,
+  safeParseDateISO
+};
