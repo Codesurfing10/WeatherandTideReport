@@ -61,6 +61,17 @@
         .current { font-size: 1.5em; text-align: center; background: rgba(255, 182, 193, 0.3); padding: 20px; border-radius: 15px; }
         .loading { text-align: center; font-style: italic; }
         footer { text-align: center; margin-top: 40px; color: #FBB6C1; }
+        
+        /* Marine Card Styles */
+        .marine-card h2 { margin-top: 0; }
+        .marine-card-content { padding: 15px 0; }
+        .marine-data { display: grid; gap: 10px; }
+        .marine-item { background: rgba(255, 255, 255, 0.1); padding: 12px; border-radius: 8px; }
+        .marine-item.highlight { background: rgba(255, 182, 193, 0.3); font-size: 1.1em; }
+        .marine-footer { margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.2); text-align: center; }
+        .marine-footer a { color: #FFB851; text-decoration: none; }
+        .marine-footer a:hover { text-decoration: underline; }
+        .error { background: rgba(229, 62, 62, 0.3); padding: 15px; border-radius: 8px; text-align: center; }
     </style>
 </head>
 <body>
@@ -89,10 +100,17 @@
             <p>Based on NOAA data for La Jolla</p>
             <ul id="tide-list" class="loading">Loading tides...</ul>
         </section>
+        
+        <section id="ndbc-marine">
+            <div id="marine-card-container"></div>
+        </section>
     </div>
 
     <footer>Data: Open-Meteo & NOAA • Updated live</footer>
 
+    <!-- Marine Card Component -->
+    <script src="src/components/MarineCard.js"></script>
+    
     <script>
         // Register service worker for offline/PWA
         if ('serviceWorker' in navigator) {
@@ -189,6 +207,14 @@
         fetchWeather();
         fetchMarine();
         fetchTides();
+        
+        // Initialize NOAA NDBC Marine Card
+        // Using station 46086 (San Clemente Basin, CA) - closest to Solana Beach
+        // Alternative stations: 46225 (Torrey Pines Outer), 46232 (Point Loma South)
+        new MarineCard('marine-card-container', {
+            station: '46086',
+            apiBase: '/api/marine'
+        });
     </script>
 </body>
 </html>
